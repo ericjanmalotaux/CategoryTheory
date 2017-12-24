@@ -12,10 +12,14 @@ public class Chapter2 {
         return new Function<T, R>() {
             Map<T, R> memo = new HashMap<>();
 
-            @Override
             public R apply(T f) {
                 R result = memo.get(f);
                 if (result == null) {
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                     result = function.apply(f);
                     memo.put(f, result);
                 }

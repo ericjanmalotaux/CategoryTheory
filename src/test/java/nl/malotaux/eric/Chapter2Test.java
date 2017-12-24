@@ -4,6 +4,7 @@ import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.function.Function;
 
 import static java.lang.Thread.sleep;
@@ -19,20 +20,30 @@ public class Chapter2Test {
     }
 
     public String fetch(String key)  {
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         return db.get(key);
     }
 
+    public int seededRandom(long seed) {
+        return new Random(seed).nextInt();
+    }
+
     @Test
-    public void testMemoize() throws InterruptedException {
-        Function<String, String> memoize = Chapter2.memoize2(this::fetch);
-        assertThat(memoize.apply("Key1"), is("Value1"));
-        assertThat(memoize.apply("Key1"), is("Value1"));
-        assertThat(memoize.apply("Key2"), is("Value2"));
-        assertThat(memoize.apply("Key2"), is("Value2"));
+    public void testMemoize() throws Exception {
+        Function<String, String> memoize = Chapter2.memoize(this::fetch);
+        assertThat(memoize.apply("Key1"), is(fetch("Key1")));
+        assertThat(memoize.apply("Key1"), is(fetch("Key1")));
+        assertThat(memoize.apply("Key2"), is(fetch("Key2")));
+        assertThat(memoize.apply("Key2"), is(fetch("Key2")));
+    }
+
+    @Test
+    public void random() throws Exception {
+        Function<Long, Integer> memoize = Chapter2.memoize(this::seededRandom);
+        assertThat(memoize.apply(1L), is(-1155869325));
+        assertThat(memoize.apply(2L), is(-1154715079));
+        assertThat(memoize.apply(3L), is(-1155099828));
+        assertThat(memoize.apply(1L), is(-1155869325));
+        assertThat(memoize.apply(2L), is(-1154715079));
+        assertThat(memoize.apply(3L), is(-1155099828));
     }
 }
